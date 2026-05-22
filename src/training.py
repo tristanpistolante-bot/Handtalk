@@ -127,7 +127,7 @@ def launch_training(username="Guest"):
     score          = 0
     total          = 0
 
-     # -----------------------
+    # -----------------------
     # TKINTER INIT
     # -----------------------
     root = tk.Tk()
@@ -139,6 +139,15 @@ def launch_training(username="Guest"):
     root.geometry(f"{screen_w}x{screen_h}+0+0")
     root.state("zoomed")
     root.configure(bg="#1e293b")  # Dark slate background
+
+    # Set window icon
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(script_dir)
+        icon_path = os.path.join(parent_dir, "Assets", "Logo", "highfive-removebg-preview.ico")
+        root.iconbitmap(icon_path)
+    except Exception as e:
+        print(f"⚠️ Could not set window icon: {e}")
 
     root.lift()
     root.attributes("-topmost", True)

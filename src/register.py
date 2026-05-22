@@ -17,6 +17,7 @@ def launch_register(parent=None, on_close=None):
     # -----------------------
     window = tk.Toplevel(parent) if parent else tk.Tk()
     window.title("HandTalk - Register")
+
     window.resizable(False, False)
     if parent:
         window.grab_set()  # lock focus to this window
@@ -33,6 +34,15 @@ def launch_register(parent=None, on_close=None):
 
     window.geometry(f"{window_width}x{window_height}+{x}+{y}")
     window.configure(bg="white")
+
+    # Set window icon
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(script_dir)
+        icon_path = os.path.join(parent_dir, "Assets", "Logo", "highfive-removebg-preview.ico")
+        window.iconbitmap(icon_path)
+    except Exception as e:
+        print(f"⚠️ Could not set window icon: {e}")
 
     # -----------------------
     # LOGO ICON (green square + hand image)

@@ -123,7 +123,6 @@ def launch_menu(username="Guest"):
     # -----------------------
     root = tk.Tk()
     root.title("HandTalk - Menu")
-    root.resizable(False, False)
 
     # center window
     window_width  = 450
@@ -137,6 +136,15 @@ def launch_menu(username="Guest"):
 
     root.geometry(f"{window_width}x{window_height}+{x}+{y}")
     root.configure(bg="white")
+
+    # Set window icon
+    try:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(script_dir)
+        icon_path = os.path.join(parent_dir, "Assets", "Logo", "highfive-removebg-preview.ico")
+        root.iconbitmap(icon_path)
+    except Exception as e:
+        print(f"⚠️ Could not set window icon: {e}")
 
     root.lift()
     root.attributes("-topmost", True)
