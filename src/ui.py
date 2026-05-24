@@ -9,6 +9,7 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from database import insert_translation
+from tkinter import messagebox
 
 print("🚀 Starting HandTalk UI...")
 
@@ -481,8 +482,11 @@ def launch_ui(username="Guest"):
         webcam_label.imgtk = None
 
     def save_log():
-        with open("log.txt", "w") as f:
+        with open("log.txt", "a") as f:
             f.write(log_text.get("1.0", tk.END))
+            f.write("\n") # Spacing between saved translation log
+        
+        messagebox.showinfo("Saved", "Translation log has been saved successfuly! ")
 
     def clear_log():
         log_text.delete("1.0", tk.END)

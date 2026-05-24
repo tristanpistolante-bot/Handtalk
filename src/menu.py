@@ -205,7 +205,7 @@ def launch_menu(username="Guest"):
     # -----------------------
     def open_progress():
         open_module("progress.py", "launch_progress", username)
-
+  
     make_menu_btn(btn_frame, "📊", "View Progress", "Track your learning journey", open_progress)
 
     # -----------------------
