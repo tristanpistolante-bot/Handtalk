@@ -24,7 +24,7 @@ class RestartHandler(FileSystemEventHandler):
 
         # launch ui.py directly (bypass login for faster dev)
         self.process = subprocess.Popen(
-            [sys.executable, "src/progress.py"]
+            [sys.executable, "src/menu.py"]
         )
 
     def on_modified(self, event):
