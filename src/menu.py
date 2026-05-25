@@ -242,19 +242,14 @@ def launch_menu(username="Guest"):
     action = selected["action"]
 
     if action == "realtime":
-        # [REVISED] direct launch — loading window removed to fix WinError 6
-        open_module("ui.py", "launch_ui", username)
+        open_module("ui.py", "launch_ui", username) # Direct Launch
 
     elif action == "training":
-        # [REVISED] direct launch — loading window removed to fix WinError 6
-        open_module("training.py", "launch_training", username)
+        open_module("training.py", "launch_training", username) # Direct Launch
 
     elif action == "logout":
         from login import launch_login
         launch_login()
-
-    # action is None means X was pressed — do nothing, app closes cleanly
-
 
 # -----------------------
 # ENTRY POINT

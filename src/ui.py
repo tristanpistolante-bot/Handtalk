@@ -482,10 +482,19 @@ def launch_ui(username="Guest"):
         webcam_label.imgtk = None
 
     def save_log():
-        with open("log.txt", "a") as f: # "a" if you want to add/append "w" if you want to overwrite
-            f.write(log_text.get("1.0", tk.END))
-            f.write("\n") # Spacing between saved translation log
-        messagebox.showinfo("Saved", "Translation log has been saved successfuly! ")
+        # Get translation log and remove spaces/newlines
+        content = log_text.get("1.0", tk.END).strip()
+
+        if content == "":
+            messagebox.showwarning("No Log Found", "There is no translation log to save.")
+
+        else:
+            with open("log.txt", "a") as f:  # "a" append | "w" overwrite
+                f.write(content)
+                f.write("\n")
+
+            messagebox.showinfo("Saved", "Translation log has been saved successfully!")
+
 
     def clear_log():
         log_text.delete("1.0", tk.END)
