@@ -188,6 +188,7 @@ def launch_progress(username="Guest"):
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
+
         # Session rows
         for idx, (score, total, timestamp) in enumerate(sessions):
             pct = int((score / total) * 100) if total > 0 else 0

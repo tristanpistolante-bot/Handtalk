@@ -16,36 +16,35 @@ print("🚀 Starting HandTalk UI...")
 # -----------------------
 # GLOBAL VARIABLE
 # -----------------------
-frame_id = 0
-frame_count = 0
-landmarker = None
-model = None
-running = False
-cap = None
-last_letter = ""
-display_text = "Detected: None"
-stable_letter = ""
-stable_confidence = 0
-same_count = 0
-current_letter = ""  # track what letter is being counted
+frame_id = 0                    # int
+frame_count = 0                 # int
+landmarker = None               # NoneType — None is Python's way of saying "empty/not set yet"
+model = None                    # NoneType — same, will be replaced with TensorFlow model later
+running = False                 # bool
+cap = None                      # NoneType — will be replaced with OpenCV camera object later
+last_letter = ""                # str
+display_text = "Detected: None" # str
+stable_letter = ""              # str
+stable_confidence = 0           # int
+same_count = 0                  # int
+current_letter = ""             # str
 
 
 # -----------------------
 # LOAD SYSTEMS (SAFE)
 # -----------------------
 def load_systems():
-    global model, landmarker
+    global model, landmarker # global is need so it does not create new variable    
 
     try:
-        from tensorflow.keras.models import load_model
+        from tensorflow.keras.models import load_model # Import only load_model function
         model = load_model("model.h5")
         print("✅ Model loaded (A-Z Landmark-Model)")
     except Exception as e:
         print("❌ Model error:", e)
 
     try:
-        MODEL_PATH = "hand_landmarker.task"
-
+        MODEL_PATH = "hand_landmarker.task" # All caps because it would be constant variable
         base_options = python.BaseOptions(model_asset_path=MODEL_PATH)
 
         options = vision.HandLandmarkerOptions(
@@ -63,20 +62,17 @@ def load_systems():
 
 
 # -----------------------
-# [CHANGED] WRAPPED EVERYTHING INSIDE launch_ui()
+# WRAPPED EVERYTHING INSIDE launch_ui()
 # SO TKINTER STARTS FRESH AFTER LOGIN WINDOW CLOSES
 # -----------------------
-def launch_ui(username="Guest"):
-
+def launch_ui(username="Guest"): # Default to "Guest" if pass no value
     # -----------------------
-    # [CHANGED] GLOBALS DECLARED INSIDE launch_ui()
+    # GLOBALS DECLARED INSIDE launch_ui()
     # SO update_frame() AND BUTTONS CAN STILL ACCESS THEM
     # -----------------------
     global frame_id, frame_count, landmarker, model, running, cap
     global last_letter, display_text, stable_letter, stable_confidence
     global same_count, current_letter
-
-    import importlib.util
 
     # -----------------------
     # TKINTER INIT
@@ -88,7 +84,7 @@ def launch_ui(username="Guest"):
     screen_w = root.winfo_screenwidth()
     screen_h = root.winfo_screenheight()
     root.geometry(f"{screen_w}x{screen_h}+0+0")
-    root.state("zoomed")
+    root.state("zoomed") # Automatically triggers the window to maximize 
     root.configure(bg="#1e293b")  # Dark slate background
 
     # Set window icon
@@ -100,9 +96,9 @@ def launch_ui(username="Guest"):
     except Exception as e:
         print(f"⚠️ Could not set window icon: {e}")
 
-    root.lift()
-    root.attributes("-topmost", True)
-    root.after(500, lambda: root.attributes("-topmost", False))
+    root.lift() # Make the ui window to appears in front of everything else 
+    root.attributes("-topmost", True) # Forces the window to always stay on top of every other window on your screen even if you click on another app
+    root.after(500, lambda: root.attributes("-topmost", False)) #  After 0.5 seconds, Release the lock so it behaves like a normal window, Creates a small anonymous function with no name,  
 
     # Layout fix
     root.grid_rowconfigure(1, weight=1)
@@ -178,7 +174,7 @@ def launch_ui(username="Guest"):
     ).pack()
 
     # -----------------------
-    # MAIN FRAME
+    # MAIN FRAME FOR WEBCAM
     # -----------------------
     main_frame = tk.Frame(root, bg="#1e293b")
     main_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
@@ -212,7 +208,7 @@ def launch_ui(username="Guest"):
     webcam_label.pack(fill="both", expand=True, padx=2, pady=2)
 
     # -----------------------
-    # LOG FRAME (30%)
+    # TRANSLATION LOG FRAME (30%)
     # -----------------------
     log_container = tk.Frame(main_frame, bg="#334155", relief="solid", bd=2)
     log_container.grid(row=0, column=1, sticky="nsew")
@@ -246,109 +242,109 @@ def launch_ui(username="Guest"):
     # -----------------------
     # BUTTONS
     # -----------------------
-    button_container = tk.Frame(root, bg="#1e293b")
-    button_container.grid(row=2, column=0, pady=20)
+    button_container = tk.Frame(root, bg="#1e293b") # acts like a dashboard control panel where you can group all your interaction buttons Start, Stop, Save, Clear
+    button_container.grid(row=2, column=0, pady=20) 
 
     # ASL Label Map
     class_names = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
     # track scheduled loop
     after_id = None
-
+   
     # -----------------------
     # CAMERA LOOP
     # -----------------------
     def update_frame():
-        nonlocal after_id
+        nonlocal after_id   
 
         global cap, running, last_letter, frame_id
         global stable_letter, stable_confidence, same_count, current_letter
         global display_text
 
-        if not running or cap is None:
-            after_id = None
+        if not running or cap is None: # IF camera is OFF OR webcam is not opened
+            after_id = None # Reset the loop tracker cause if camera is OFF there should be NO running loop scheduled
             return
 
-        ret, frame = cap.read()
-        if not ret:
-            after_id = root.after(30, update_frame)
+        ret, frame = cap.read() # Grab one frame from webcam
+        if not ret: # If camera failed to read frame
+            after_id = root.after(30, update_frame) # delay for 0.03 seconds so instead of crashing, it keeps retrying camera input.
             return
 
-        frame = cv2.flip(frame, 1)
-        h, w, _ = frame.shape
+        frame = cv2.flip(frame, 1) # Flip the webcam so its not inverted 1(mirror model)
+        h, w, _ = frame.shape # Get the size(height, width) of the webcam frame so we can correctly map hand positions and draw UI overlays _ ignored this varaible
 
         try:
             if landmarker is not None:
 
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) # Convert webcam image from OpenCV format (BGR) to MediaPipe format (RGB)   cause OpenCv uses BGR format (Blue, Green, Red), But MediaPipe expects: RGB format (Red, Green, Blue)
 
                 mp_image = mp.Image(
-                    image_format=mp.ImageFormat.SRGB,
-                    data=rgb_frame
+                    image_format=mp.ImageFormat.SRGB, # Tells MediaPipe image color format type ie RGB format 
+                    data=rgb_frame # Converting the image format and wrapping it so MediaPipe can process the NumPy array correctly
                 )
 
-                result = landmarker.detect_for_video(mp_image, frame_id)
-                frame_id += 1
+                result = landmarker.detect_for_video(mp_image, frame_id) # Detect Hands, Landmarks base on the mp_image and frame_id
+                frame_id += 1 # Tracks hand movement over time by frame 
 
-                if result.hand_landmarks:
+                if result.hand_landmarks: # Did MediaPipe detect any hands?
 
-                    for hand_landmarks in result.hand_landmarks:
+                    for hand_landmarks in result.hand_landmarks: # hand_landmarks is TEMP variable that take one hand at a time, in means "take items from", Loops through every detected hand, 
 
-                        points            = []
-                        landmark_features = []
+                        points            = [] # Will stores screen positions of hand landmarks ex: [(320, 240), (330, 250), ...], used later for drawing skeleton lines, bounding box etc
+                        landmark_features = [] # Stores normalized landmark coordinates for TensorFlow model
 
-                        for lm in hand_landmarks:
-                            x = int(lm.x * w)
-                            y = int(lm.y * h)
+                        for lm in hand_landmarks: # lm represent 1 landmark and loops through all 21 landmarks, Processes each finger joint one by one 
+                            x = int(lm.x * w) # Converts landmark x-position into real screen coordinate.
+                            y = int(lm.y * h) # Converts landmark y-position into real screen coordinate.
 
-                            points.append((x, y))
+                            points.append((x, y)) # Add new item into list ex:(320, 240), Stores landmark positions for: skeleton drawing, bounding box etc...
 
-                            landmark_features.append(lm.x)
-                            landmark_features.append(lm.y)
-                            landmark_features.append(lm.z)
+                            landmark_features.append(lm.x) # Stores x-position as AI model input
+                            landmark_features.append(lm.y) # Stores y-coordinate for AI prediction
+                            landmark_features.append(lm.z) # Stores depth coordinate ie distance from camera negtive closer to cam, postive farther from cam
 
-                            cv2.circle(frame, (x, y), 5, (34, 197, 94), -1)  # Green dots
+                            cv2.circle(frame, (x, y), 5, (34, 197, 94), -1)  # Draws a circle on image on webcam frame green dots
 
-                        if len(points) != 21:
+                        if len(points) != 21: # "Did we successfully detect ALL 21 hand landmarks?" so that AI wouldnt confuse len iis func that count items
                             continue
 
-                        index_tip  = hand_landmarks[8]
-                        middle_tip = hand_landmarks[12]
+                        index_tip  = hand_landmarks[8] # Gets the position of the INDEX fingertip
+                        middle_tip = hand_landmarks[12] # Gets the position of the MIDDLE fingertip
 
-                        spread_x = abs(index_tip.x - middle_tip.x)
-                        spread_y = abs(index_tip.y - middle_tip.y)
+                        spread_x = abs(index_tip.x - middle_tip.x) # abs get rid negative value ex: -5 → 5, Determines how far apart the fingers are horizontally
+                        spread_y = abs(index_tip.y - middle_tip.y) # same with spread_x Measures vertical finger spacing
 
-                        landmark_features.append(spread_x)
-                        landmark_features.append(spread_y)
+                        landmark_features.append(spread_x) # Adds item into list ie Horizontal finger spacing value, Adds extra feature into AI input to better recognize finger separation, hand shape differences etc
+                        landmark_features.append(spread_y) # same with above Adds Vertical finger spacing value into AI features
 
-                        landmark_features = np.array(landmark_features).reshape(1, -1)
+                        landmark_features = np.array(landmark_features).reshape(1, -1) # Convert features into model input format
 
                         # Bounding box
-                        x_vals = [p[0] for p in points]
-                        y_vals = [p[1] for p in points]
+                        x_vals = [p[0] for p in points] # Get all x coordinates
+                        y_vals = [p[1] for p in points] # Get all y coordinates
 
-                        xmin, xmax = min(x_vals), max(x_vals)
-                        ymin, ymax = min(y_vals), max(y_vals)
+                        xmin, xmax = min(x_vals), max(x_vals) # Left/right edges
+                        ymin, ymax = min(y_vals), max(y_vals) # Top/bottom edges
 
-                        pad  = 20
-                        xmin = max(0, xmin - pad)
-                        ymin = max(0, ymin - pad)
-                        xmax = min(w, xmax + pad)
-                        ymax = min(h, ymax + pad)
+                        pad  = 20 # Box padding
+                        xmin = max(0, xmin - pad) # Expand left
+                        ymin = max(0, ymin - pad) # Expand top  
+                        xmax = min(w, xmax + pad) # Expand right
+                        ymax = min(h, ymax + pad) # Expand bottom
 
-                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (34, 197, 94), 3)  # Green box
+                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (34, 197, 94), 3)  # Draw green handbox
 
                         # Skeleton
                         HAND_CONNECTIONS = [
                             (0,1),(1,2),(2,3),(3,4),
                             (0,5),(5,6),(6,7),(7,8),
-                            (5,9),(9,10),(10,11),(11,12),
+                            (5,9),(9,10),(10,11),(11,12),    # Define which points connect ex: (0 , 1) means connect landmark 0 to landmark 1
                             (9,13),(13,14),(14,15),(15,16),
                             (13,17),(17,18),(18,19),(19,20),
                             (0,17)
                         ]
 
-                        for start, end in HAND_CONNECTIONS:
+                        for start, end in HAND_CONNECTIONS: # Processes every hand connection one by one, Take one connection pair -> Draw line between landmarks -> Repeat for all fingers
                             cv2.line(frame, points[start], points[end], (59, 130, 246), 2)  # Blue lines
 
                         # Prediction
